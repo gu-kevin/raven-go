@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"crypto/rand"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -13,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	mrand "math/rand"
 	"net/http"
 	"net/url"
@@ -23,8 +21,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/certifi/gocertifi"
 )
 
 const (
@@ -360,17 +356,10 @@ func SetMaxQueueBuffer(maxCount int) {
 
 func newTransport() Transport {
 	t := &HTTPTransport{}
-	rootCAs, err := gocertifi.CACerts()
-	if err != nil {
-		debugLogger.Println("failed to load root TLS certificates:", err)
-	} else {
-		t.Client = &http.Client{
-			Transport: &http.Transport{
-				Proxy:           http.ProxyFromEnvironment,
-				TLSClientConfig: &tls.Config{RootCAs: rootCAs},
-			},
-			Timeout: transportClientTimeout,
-		}
+	t.Client = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
 	}
 	return t
 }
